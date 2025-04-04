@@ -1,0 +1,38 @@
+model AuditEvent {
+  id    Int    @id @default(autoincrement())
+  title String
+
+  description String?
+  location    String?
+  url         String?
+  details     Json?
+
+  model     String?
+  operation Operation?
+  old_data  Json?
+  new_data  Json?
+
+  author_id       String?
+  organization_id String?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("audit_events")
+}
+
+enum Operation {
+  create
+  update
+  delete
+  findUnique
+  findFirst
+  findMany
+  upsert
+  deleteMany
+  updateMany
+  aggregate
+  count
+  groupBy
+}

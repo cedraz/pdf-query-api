@@ -1,0 +1,110 @@
+model Member {
+  id          String       @id @default(uuid())
+  invited_at  DateTime
+  joined_at   DateTime?
+  last_active DateTime?
+  status      MemberStatus
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Foreign keys
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  user_id         String
+  user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  role_id         Int
+  role            Role         @relation(fields: [role_id], references: [id], onDelete: Cascade)
+  supervisor_id   String?
+  supervisor      Member?      @relation("SupervisorRelation", fields: [supervisor_id], references: [id], onDelete: Cascade)
+
+  member_permissions MemberPermission[]
+  supervisees        Member[]           @relation("SupervisorRelation")
+
+  @@unique([organization_id, user_id])
+  @@map("members")
+}
+
+model Role {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  description String?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Foreign keys
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  role_permissions RolePermission[]
+  members          Member[]
+  invites          Invite[]
+
+  @@map("roles")
+}
+
+model Module {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  label       String
+  actions     String[]
+  description String?  @default("")
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Foreign keys
+  organization_id    String
+  organization       Organization       @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+  role_permissions   RolePermission[]
+  member_permissions MemberPermission[]
+
+  @@map("modules")
+}
+
+model RolePermission {
+  id      Int      @id @default(autoincrement())
+  allowed String[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Foreign keys
+  module_id Int
+  module    Module @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  role_id   Int
+  role      Role   @relation(fields: [role_id], references: [id], onDelete: Cascade)
+
+  @@unique([module_id, role_id])
+  @@index([module_id, role_id])
+  @@map("role_permissions")
+}
+
+model MemberPermission {
+  id      Int      @id @default(autoincrement())
+  allowed String[]
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Foreign keys
+  member_id String
+  member    Member @relation(fields: [member_id], references: [id], onDelete: Cascade)
+  module_id Int
+  module    Module @relation(fields: [module_id], references: [id], onDelete: Cascade)
+
+  @@unique([member_id, module_id])
+  @@index([member_id, module_id])
+  @@map("member_permissions")
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+}

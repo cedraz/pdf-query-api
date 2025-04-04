@@ -1,0 +1,50 @@
+services:
+  api:
+    build: .
+    container_name: docling-api
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --access-log false
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+
+  db:
+    image: postgres:alpine
+    container_name: pdf-query-postgres
+    ports:
+      - 5434:5432
+    environment:
+      - POSTGRES_USER=pdfquery
+      - POSTGRES_PASSWORD=pdfquery # Certifique-se de que esta senha está correta
+      - POSTGRES_DB=pdfquerydb
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+  mongo:
+    image: mongo:latest  
+    container_name: pdf-query-mongo
+    ports:
+      - "27017:27017"  
+    volumes:
+      - mongo-data:/data/db 
+
+  redis:
+    image: redis
+    container_name: pdf-query-redis
+    ports:
+      - 6382:6379
+    environment:
+      - NODE_ENV=dev
+    deploy:
+      resources:
+        limits:
+          cpus: '0.1'
+          memory: 64M
+    volumes:
+      - ./redis/data:/data
+          
+volumes:
+  mongo-data:
+  postgres-data:
+  redis-data:
+  

@@ -1,0 +1,68 @@
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  cpf           String   @unique
+  phone         String
+  name          String
+  password_hash String
+  token_version Int      @default(0) // INVALIDAR AS SESSÕES DO USUÁRIO EM CASO DE REBAIXAMENTO DE CARGO
+  birth_date    DateTime
+
+  bank_corporate_reason String?
+  agency                String?
+  agency_digit          String?
+  account               String?
+  account_digit         String?
+  pix_key_type          PixKeyType?
+  pix_key               String?
+
+  postal_code    String?
+  address_line   String?
+  address_number String?
+  neighborhood   String?
+  city           String?
+  state          String?
+
+  image             String?
+  email_verified_at DateTime?
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Foreign keys
+  member_on Member[]
+  invites   Invite[]
+
+  @@map("users")
+}
+
+enum PixKeyType {
+  CPF
+  CNPJ
+  EMAIL
+  PHONE
+  RANDOM
+}
+
+enum VerificationType {
+  EMAIL_VERIFICATION
+  PASSWORD_RESET
+  COMPLETE_USER_CREATION
+  GLOBAL_ADMIN_VERIFICATION
+}
+
+model VerificationRequest {
+  id         String           @id @default(uuid())
+  identifier String           @unique // email, phone or cpf
+  code       String // 6 digit code
+  expires    DateTime
+  type       VerificationType
+  metadata   Json? // JSON with extra data, like user id, etc
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  @@unique([identifier, type])
+  @@map("verification_requests")
+}

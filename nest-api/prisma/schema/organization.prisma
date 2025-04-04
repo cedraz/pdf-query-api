@@ -1,0 +1,65 @@
+model Organization {
+  id             String @id @default(uuid())
+  name           String @unique
+  cnpj           String @unique
+  corporate_name String
+  phone          String
+  billing_email  String
+  general_email  String
+
+  postal_code    String
+  address_line   String
+  address_number String
+  neighborhood   String
+  city           String
+  state          String
+
+  logo_url      String?
+  button_colors ButtonColors?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  // Foreign keys
+  roles   Role[]
+  modules Module[]
+  members Member[]
+  invites Invite[]
+
+  @@map("organizations")
+}
+
+model Invite {
+  id         String   @id @default(uuid())
+  email      String
+  expires_at DateTime
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  // Foreign keys
+  role_id         Int
+  role            Role         @relation(fields: [role_id], references: [id])
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
+
+  inviter_id String? // OPCIONAL POIS O CONVITE DEVE EXISTIR MESMO SEM O USUÁRIO QUE CONVIDOU
+  inviter    User?   @relation(fields: [inviter_id], references: [id])
+
+  @@unique([organization_id, email]) // DENTRO DE UMA ORGANIZAÇÃO NÃO HÁ MAIS DE UM CONVITE COM O MESMO EMAIL
+  @@index([email]) // OTIMIZAÇÃO PARA BUSCA DE CONVITES POR EMAIL
+  @@map("invites")
+}
+
+enum ButtonColors {
+  BLACK
+  RED
+  ORANGE
+  YELLOW
+  GREEN
+  CIAN
+  BLUE
+  PURPLE
+  PINK
+}
