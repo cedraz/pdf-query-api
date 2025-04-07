@@ -15,14 +15,15 @@ model Member {
   user            User         @relation(fields: [user_id], references: [id], onDelete: Cascade)
   role_id         Int
   role            Role         @relation(fields: [role_id], references: [id], onDelete: Cascade)
-  supervisor_id   String?
-  supervisor      Member?      @relation("SupervisorRelation", fields: [supervisor_id], references: [id], onDelete: Cascade)
-
-  member_permissions MemberPermission[]
-  supervisees        Member[]           @relation("SupervisorRelation")
 
   @@unique([organization_id, user_id])
   @@map("members")
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
 }
 
 model Role {
@@ -45,29 +46,9 @@ model Role {
   @@map("roles")
 }
 
-model Module {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique
-  label       String
-  actions     String[]
-  description String?  @default("")
-
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
-  deleted_at DateTime?
-
-  // Foreign keys
-  organization_id    String
-  organization       Organization       @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-  role_permissions   RolePermission[]
-  member_permissions MemberPermission[]
-
-  @@map("modules")
-}
-
 model RolePermission {
   id      Int      @id @default(autoincrement())
-  allowed String[]
+  allowed Action[]
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
@@ -84,27 +65,34 @@ model RolePermission {
   @@map("role_permissions")
 }
 
-model MemberPermission {
-  id      Int      @id @default(autoincrement())
-  allowed String[]
+model Module {
+  id          Int     @id @default(autoincrement())
+  name        String  @unique
+  label       String
+  description String? @default("")
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
   // Foreign keys
-  member_id String
-  member    Member @relation(fields: [member_id], references: [id], onDelete: Cascade)
-  module_id Int
-  module    Module @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  organization_id String
+  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
 
-  @@unique([member_id, module_id])
-  @@index([member_id, module_id])
-  @@map("member_permissions")
+  role_permissions RolePermission[]
+  actions          Action[]
+
+  @@map("modules")
 }
 
-enum MemberStatus {
-  ACTIVE
-  INACTIVE
-  PENDING
+model Action {
+  id   Int    @id @default(autoincrement())
+  name String @unique
+
+  // Foreign keys
+  role_permissions RolePermission[]
+  modules          Module[]
+
+  @@index([name])
+  @@map("actions")
 }

@@ -1,6 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreatePriceTableDto } from './dto/create-price-table.dto';
-import { UpdatePriceTableDto } from './dto/update-price-table.dto';
 import { CreateSimulationDto } from './dto/create-simulation.dto';
 import { RedisService } from 'src/redis/redis.service';
 import { LmStudioService } from 'src/providers/lm-studio/lm-studio.service';
@@ -20,19 +23,31 @@ export class PriceTableService {
     private priceTableModel: Model<PriceTable>,
   ) {}
 
-  async create(createPriceTableDto: CreatePriceTableDto) {
-    const doctags = await this.doclingService.processPDF(
-      createPriceTableDto.file.buffer,
-    );
+  async create(
+    file: Express.Multer.File,
+    createPriceTableDto: CreatePriceTableDto,
+  ) {
+    const priceTableExists = await this.priceTableModel.findOne({
+      name: createPriceTableDto.name,
+    });
+
+    if (priceTableExists) {
+      throw new ConflictException(
+        ErrorMessagesHelper.PRICE_TABLE_ALREADY_EXISTS,
+      );
+    }
+
+    const doctags = await this.doclingService.processPDF(file.buffer);
 
     const createdPriceTable = new this.priceTableModel({
-      filename: createPriceTableDto.file.fieldname,
-      doctags,
+      filename: file.fieldname,
+      doctags: doctags.content,
       name: createPriceTableDto.name,
       organization_id: createPriceTableDto.organization_id,
     });
 
-    return createdPriceTable.save();
+    const savedPriceTable = await createdPriceTable.save();
+    return savedPriceTable.toObject();
   }
 
   async createSimulation(createSimulationDto: CreateSimulationDto) {
@@ -67,9 +82,9 @@ export class PriceTableService {
     return `This action returns a #${id} priceTable`;
   }
 
-  update(id: number, updatePriceTableDto: UpdatePriceTableDto) {
-    return `This action updates a #${id} priceTable`;
-  }
+  // update(id: number, updatePriceTableDto: UpdatePriceTableDto) {
+  //   return `This action updates a #${id} priceTable`;
+  // }
 
   remove(id: number) {
     return `This action removes a #${id} priceTable`;

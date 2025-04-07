@@ -9,7 +9,6 @@ function createExtendedPrismaClient(
   return new PrismaClient().$extends(
     createAuditEventExtension(auditEventQueueService),
   );
-  // .$extends(proposalExtension)
 }
 
 const ExtendedPrismaClient = class {

@@ -38,11 +38,6 @@ export class UpdateMemberDto extends UpdateUserDto {
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
-  supervisor_id?: string;
-
-  @ApiPropertyOptional()
-  @IsOptional()
-  @IsString()
   bank_corporate_reason?: string;
 
   @ApiPropertyOptional()

@@ -26,7 +26,6 @@ export class OrganizationService {
       },
       include: {
         invites: true,
-        proposals: true,
         members: true,
       },
     });
@@ -84,7 +83,6 @@ export class OrganizationService {
       ...organizationPaginationDto.orderBy(),
       include: {
         invites: true,
-        proposals: true,
         members: true,
       },
     });
@@ -242,6 +240,5 @@ const organizationSelect = {
   created_at: true,
   updated_at: true,
   invites: true,
-  proposals: true,
   members: true,
 };

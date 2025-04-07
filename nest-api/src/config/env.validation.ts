@@ -23,6 +23,10 @@ class EnvironmentVariables {
 
   @IsString()
   @IsNotEmpty()
+  MONGODB_URI: string;
+
+  @IsString()
+  @IsNotEmpty()
   REDIS_HOST: string;
 
   @IsString()
@@ -85,10 +89,6 @@ class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   CLOUDINARY_API_SECRET: string;
-
-  @IsString()
-  @IsNotEmpty()
-  MONGODB_URI: string;
 }
 
 export function validate(config: Record<string, unknown>) {

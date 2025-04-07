@@ -1,8 +1,8 @@
 services:
   api:
     build: .
-    container_name: docling-api
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload --access-log false
+    container_name: pdf-query-docling-api
+    # command: uvicorn docling-api.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     volumes:

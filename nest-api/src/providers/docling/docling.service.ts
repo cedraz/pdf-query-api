@@ -21,6 +21,10 @@ export class DoclingService {
       body: formData,
     });
 
+    if (!response.ok) {
+      throw new Error('Failed to process PDF');
+    }
+
     const data = (await response.json()) as TDoclingResponse;
 
     return data;

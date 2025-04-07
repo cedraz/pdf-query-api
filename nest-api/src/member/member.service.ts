@@ -242,7 +242,6 @@ export class MemberService {
         last_active: updateMemberDto.last_active,
         status: updateMemberDto.status,
         role_id: updateMemberDto.role_id,
-        supervisor_id: updateMemberDto.supervisor_id,
       },
     });
 

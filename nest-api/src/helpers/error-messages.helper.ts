@@ -3,11 +3,12 @@ export const ErrorMessagesHelper = {
   ORGANIZATION_NOT_FOUND: 'Organização não encontrada.',
   MEMBER_NOT_FOUND: 'Membro não encontrado.',
   INVITE_NOT_FOUND: 'Convite não encontrado.',
-  PROPOSAL_NOT_FOUND: 'Proposta não encontrada.',
   ROLE_NOT_FOUND: 'Cargo não encontrada.',
   PRICE_TABLE_NOT_FOUND: 'Tabela de preços não encontrada.',
   ROLE_NAME_TAKEN: 'Nome de cargo já está em uso.',
   USER_ALREADY_EXISTS: 'Credenciais inválidas para cadastro do usuário.',
+  PRICE_TABLE_ALREADY_EXISTS:
+    'Tabela de preços já existe para esta organização.',
   GLOBAL_ADMIN_EXISTS:
     'Credenciais inválidas para cadastro do administrador global.',
   UNAUTHORIZED: 'Acesso não autorizado.',

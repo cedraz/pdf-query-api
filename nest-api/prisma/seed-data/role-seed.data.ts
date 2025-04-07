@@ -1,6 +1,20 @@
-export const modules = [];
+export const modules = ['profile', 'priceTable', 'users'];
 
-const moduleData = [];
+type TModuleData = {
+  name: string;
+  label: string;
+  actions: string[];
+  description: string;
+};
+
+const moduleData: TModuleData[] = [
+  {
+    name: modules[0],
+    label: 'Perfil',
+    actions: ['create', 'read', 'update', 'delete'],
+    description: 'Gerenciamento do perfil',
+  },
+];
 
 type TRoleData = {
   name: string;
