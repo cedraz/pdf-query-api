@@ -1,9 +1,8 @@
-import { Body, Controller, Get, Param, Patch, Put } from '@nestjs/common';
+import { Body, Controller, Get, Param, Put } from '@nestjs/common';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { RolePermissionService } from './role.service';
 import { Role } from './entity/role.entity';
 import { Module } from './entity/module.entity';
-import { MemberPermission } from './entity/member-permission.entity';
 import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Controller('/:organization_id/role')
@@ -26,23 +25,8 @@ export class RoleController {
 
   @Get('modules')
   @ApiOkResponse({ type: [Module] })
-  findModules(@Param('organization_id') organization_id: string) {
-    return this.roleService.findModules(organization_id);
-  }
-
-  @Patch(':role_id/copy-permissions/:member_id')
-  @ApiOkResponse({ type: [MemberPermission] })
-  copyRolePermissionsToMember(
-    @Param('role_id') role_id: number,
-    @Param('member_id') member_id: string,
-  ) {
-    return this.roleService.copyRolePermissionsToMember(role_id, member_id);
-  }
-
-  @Patch(':role_id/sync-permissions')
-  @ApiOkResponse({ type: [MemberPermission] })
-  syncRoleToMembers(@Param('role_id') role_id: number) {
-    return this.roleService.syncRoleToMembers(role_id);
+  findModules() {
+    return this.roleService.findModules();
   }
 
   @Put(':role_id')

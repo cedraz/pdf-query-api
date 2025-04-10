@@ -44,10 +44,6 @@ export class CreateOrganizationDto {
 
   @IsString()
   @IsNotEmpty()
-  country: string;
-
-  @IsString()
-  @IsNotEmpty()
   phone: string;
 
   @IsString()

@@ -8,5 +8,5 @@ export class UpdateRolePermissionDto {
   module_id: number;
 
   @IsArray()
-  allowed: string[];
+  allowed_permission_ids: number[];
 }

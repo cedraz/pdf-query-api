@@ -1,47 +1,5 @@
 import { GlobalAdminStatus, MemberStatus } from '@prisma/client';
 
-const userDionisioData = {
-  email: 'douglas.silva@sounuv.com',
-  name: 'Dionisio',
-  phone: '123456786',
-  cpf: '42668442412',
-  email_verified_at: new Date(),
-  postal_code: '12345678',
-  address_line: 'Rua Teste',
-  address_number: '123',
-  neighborhood: 'Bairro Teste',
-  city: 'Cidade Teste',
-  state: 'Estado Teste',
-};
-
-const user1Data = {
-  email: 'userone@email.com',
-  name: 'User',
-  phone: '123456789',
-  cpf: '12345678900',
-  email_verified_at: new Date(),
-  postal_code: '12345678',
-  address_line: 'Rua Teste',
-  address_number: '123',
-  neighborhood: 'Bairro Teste',
-  city: 'Cidade Teste',
-  state: 'Estado Teste',
-};
-
-const user2Data = {
-  email: 'usertwo@email.com',
-  name: 'User 2',
-  phone: '123456789',
-  cpf: '87992565508',
-  email_verified_at: new Date(),
-  postal_code: '12345678',
-  address_line: 'Rua Teste',
-  address_number: '123',
-  neighborhood: 'Bairro Teste',
-  city: 'Cidade Teste',
-  state: 'Estado Teste',
-};
-
 const user3Data = {
   email: 'userthree@email.com',
   name: 'User 3',
@@ -90,12 +48,9 @@ const globalAdminData = {
 };
 
 export {
-  user1Data,
-  user2Data,
   user3Data,
   organizationData,
   member1Data,
   member2Data,
-  userDionisioData,
   globalAdminData,
 };

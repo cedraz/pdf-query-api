@@ -1,11 +1,16 @@
-export class Module {
+import { Action } from './action.entity';
+
+export class ModuleSimple {
   id: number;
   name: string;
-  label: string;
+  display_name: string;
   description?: string | null;
-  actions: string[];
+  enabled: boolean;
   created_at: Date;
   updated_at: Date;
   deleted_at?: Date | null;
-  organization_id: string;
+}
+
+export class Module extends ModuleSimple {
+  actions: Action[];
 }

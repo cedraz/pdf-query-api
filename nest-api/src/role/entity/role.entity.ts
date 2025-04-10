@@ -1,6 +1,6 @@
 import { RolePermission } from './role-permission.entity';
 
-export class Role {
+export class RoleSimple {
   id: number;
   name: string;
   description?: string | null;
@@ -8,5 +8,8 @@ export class Role {
   updated_at: Date;
   deleted_at?: Date | null;
   organization_id: string;
+}
+
+export class Role extends RoleSimple {
   role_permissions?: RolePermission[];
 }

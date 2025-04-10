@@ -1,10 +1,4 @@
-import {
-  IsArray,
-  IsBoolean,
-  IsOptional,
-  IsString,
-  ValidateNested,
-} from 'class-validator';
+import { IsArray, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { UpdateRolePermissionDto } from './update-many-role-permissions.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
@@ -26,7 +20,4 @@ export class UpdateRoleDto {
   @ValidateNested({ each: true })
   @Type(() => UpdateRolePermissionDto)
   role_permissions?: UpdateRolePermissionDto[];
-
-  @IsBoolean()
-  propagate: boolean;
 }

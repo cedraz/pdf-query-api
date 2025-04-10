@@ -26,7 +26,20 @@ export class AuthService {
       include: {
         member_on: {
           include: {
-            member_permissions: true,
+            role: {
+              include: {
+                role_permissions: {
+                  include: {
+                    module: {
+                      include: {
+                        actions: true,
+                      },
+                    },
+                    allowed: true,
+                  },
+                },
+              },
+            },
           },
         },
       },

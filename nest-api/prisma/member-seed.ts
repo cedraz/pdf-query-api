@@ -29,7 +29,7 @@ export async function memberSeed(
       const role = randomRole();
       const status = randomStatus();
 
-      const member = await prisma.member.upsert({
+      return await prisma.member.upsert({
         where: {
           organization_id_user_id: {
             organization_id,
@@ -45,47 +45,8 @@ export async function memberSeed(
         },
         update: {},
       });
-
-      await copyRolePermissionsToMember(prisma, role.id, member.id);
     }),
   );
 
-  // await copyRolePermissionsToMember(
-  //   prisma,
-  //   6,
-  //   '10da107d-af8a-4b3d-bf7f-61cef73eb3b2',
-  // );
-
   return members;
-}
-
-async function copyRolePermissionsToMember(
-  prisma: PrismaClient,
-  role_id: number,
-  member_id: string,
-) {
-  const role_permissions = await prisma.rolePermission.findMany({
-    where: { role_id },
-  });
-
-  const member_permissions = role_permissions.map((rp) => {
-    return prisma.memberPermission.upsert({
-      where: {
-        member_id_module_id: {
-          member_id,
-          module_id: rp.module_id,
-        },
-      },
-      update: { allowed: rp.allowed },
-      create: {
-        member_id,
-        module_id: rp.module_id,
-        allowed: rp.allowed,
-      },
-    });
-  });
-
-  await prisma.$transaction(member_permissions);
-
-  return member_permissions;
 }

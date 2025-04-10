@@ -14,8 +14,19 @@ export class CaslAbilityFactory {
     const member = await this.prisma.member.findUnique({
       where: { id: member_id },
       include: {
-        member_permissions: {
-          include: { module: true },
+        role: {
+          include: {
+            role_permissions: {
+              include: {
+                module: {
+                  include: {
+                    actions: true,
+                  },
+                },
+                allowed: true,
+              },
+            },
+          },
         },
       },
     });
@@ -24,12 +35,16 @@ export class CaslAbilityFactory {
       throw new NotFoundException(ErrorMessagesHelper.MEMBER_NOT_FOUND);
     }
 
-    member.member_permissions.forEach((mp) => {
-      const subject = mp.module.name;
+    member.role.role_permissions.forEach((rp) => {
+      const subject = rp.module.name;
 
-      mp.allowed.forEach((action) => {
-        if (mp.module.actions.includes(action)) {
-          can(action, subject);
+      const modulePermissionsIds = rp.module.actions.map((action) =>
+        rp.module.enabled && action.enabled ? action.id : null,
+      );
+
+      rp.allowed.forEach((permission) => {
+        if (modulePermissionsIds.includes(permission.id)) {
+          can(permission.name, subject);
         }
       });
     });

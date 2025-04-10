@@ -1,4 +1,6 @@
 export const ErrorMessagesHelper = {
+  AI_SERVICE_UNAVAILABLE:
+    'Erro ao tentar se comunicar com o serviço externo da IA.',
   USER_NOT_FOUND: 'Usuário não encontrado.',
   ORGANIZATION_NOT_FOUND: 'Organização não encontrada.',
   MEMBER_NOT_FOUND: 'Membro não encontrado.',

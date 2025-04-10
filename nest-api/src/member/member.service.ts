@@ -10,7 +10,6 @@ import { MemberPaginationDto } from './dto/member.pagination.dto';
 import { PaginationResultDto } from 'src/common/entities/pagination-result.entity';
 import { Member } from './entities/member.entity';
 import { UpdateMemberDto } from './dto/update-member.dto';
-import { UpdateMemberPermissionsDto } from './dto/update-member-permissions.dto';
 import * as bcrypt from 'bcrypt';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateManyMembersDto } from './dto/update-many-members.dto';
@@ -64,16 +63,6 @@ export class MemberService {
         user_id: createMemberDto.user_id,
         role_id: createMemberDto.role_id,
         invited_at: createMemberDto.invited_at,
-        member_permissions: {
-          createMany: {
-            data: role.role_permissions.map((rolePermission) => {
-              return {
-                module_id: rolePermission.module.id,
-                allowed_actions: rolePermission.allowed,
-              };
-            }),
-          },
-        },
       },
     });
   }
@@ -115,7 +104,12 @@ export class MemberService {
           include: {
             role_permissions: {
               include: {
-                module: true,
+                module: {
+                  include: {
+                    actions: true,
+                  },
+                },
+                allowed: true,
               },
             },
           },
@@ -245,46 +239,7 @@ export class MemberService {
       },
     });
 
-    if (updateMemberDto.member_permissions) {
-      await this.updateMemberPermissions(
-        member.id,
-        updateMemberDto.member_permissions,
-      );
-    }
-
     return { memberUpdated };
-  }
-
-  async updateMemberPermissions(
-    member_id: string,
-    updateMemberPermissionsDto: UpdateMemberPermissionsDto[],
-  ) {
-    const memberPermissionsTransaction = updateMemberPermissionsDto.map(
-      (updateMemberPermissions) => {
-        return this.prismaService.memberPermission.upsert({
-          where: {
-            member_id_module_id: {
-              module_id: updateMemberPermissions.module_id,
-              member_id,
-            },
-          },
-          create: {
-            module_id: updateMemberPermissions.module_id,
-            allowed: updateMemberPermissions.allowed,
-            member_id,
-          },
-          update: {
-            allowed: updateMemberPermissions.allowed,
-          },
-        });
-      },
-    );
-
-    const memberPermissions = await this.prismaService.$transaction(
-      memberPermissionsTransaction,
-    );
-
-    return memberPermissions;
   }
 
   async changePassword(user_id: string, changePasswordDto: ChangePasswordDto) {

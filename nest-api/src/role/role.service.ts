@@ -7,51 +7,6 @@ import { ErrorMessagesHelper } from 'src/helpers/error-messages.helper';
 export class RolePermissionService {
   constructor(private prisma: PrismaService) {}
 
-  async copyRolePermissionsToMember(role_id: number, member_id: string) {
-    const member = await this.prisma.member.findUnique({
-      where: { id: member_id },
-    });
-
-    if (!member) {
-      throw new NotFoundException(ErrorMessagesHelper.MEMBER_NOT_FOUND);
-    }
-
-    const role = await this.prisma.role.findUnique({
-      where: { id: role_id },
-    });
-
-    if (!role) {
-      throw new NotFoundException(ErrorMessagesHelper.ROLE_NOT_FOUND);
-    }
-
-    const role_permissions = await this.prisma.rolePermission.findMany({
-      where: { role_id },
-    });
-
-    const memberPermissionsTransaction = role_permissions.map((rp) => {
-      return this.prisma.memberPermission.upsert({
-        where: {
-          member_id_module_id: {
-            member_id,
-            module_id: rp.module_id,
-          },
-        },
-        update: { allowed: rp.allowed },
-        create: {
-          member_id,
-          module_id: rp.module_id,
-          allowed: rp.allowed,
-        },
-      });
-    });
-
-    const member_permissions = await this.prisma.$transaction(
-      memberPermissionsTransaction,
-    );
-
-    return member_permissions;
-  }
-
   async updateRole(role_id: number, updateRoleDto: UpdateRoleDto) {
     const role = await this.prisma.role.findUnique({
       where: { id: role_id },
@@ -61,11 +16,16 @@ export class RolePermissionService {
       throw new NotFoundException(ErrorMessagesHelper.ROLE_NOT_FOUND);
     }
 
-    const { name, description, role_permissions, propagate } = updateRoleDto;
+    const { name, description, role_permissions } = updateRoleDto;
 
     if (name) {
       const roleWithSameName = await this.prisma.role.findUnique({
-        where: { name },
+        where: {
+          name_organization_id: {
+            name,
+            organization_id: role.organization_id,
+          },
+        },
       });
 
       if (roleWithSameName && roleWithSameName.id !== role_id) {
@@ -104,64 +64,33 @@ export class RolePermissionService {
               role_id,
             },
           },
-          update: { allowed: rp.allowed },
           create: {
             module_id: rp.module_id,
             role_id,
-            allowed: rp.allowed,
+            allowed: {
+              connect: rp.allowed_permission_ids.map((permission_id) => ({
+                id: permission_id,
+              })),
+            },
+          },
+          update: {
+            allowed: {
+              set: [],
+              connect: rp.allowed_permission_ids.map((permission_id) => ({
+                id: permission_id,
+              })),
+            },
           },
         });
       });
 
       await this.prisma.$transaction(upsertRolePermissions);
-
-      if (propagate) {
-        await this.syncRoleToMembers(role_id);
-      }
     }
   }
 
-  async syncRoleToMembers(role_id: number) {
-    const members = await this.prisma.member.findMany({
-      where: { role_id },
-      include: { member_permissions: true },
-    });
-
-    const role_permissions = await this.prisma.rolePermission.findMany({
-      where: { role_id },
-    });
-
-    const memberPermissionTransaction = members.map((member) => {
-      return role_permissions.map((rp) => {
-        return this.prisma.memberPermission.upsert({
-          where: {
-            member_id_module_id: {
-              member_id: member.id,
-              module_id: rp.module_id,
-            },
-          },
-          create: {
-            member_id: member.id,
-            module_id: rp.module_id,
-            allowed: rp.allowed,
-          },
-          update: {
-            allowed: rp.allowed,
-          },
-        });
-      });
-    });
-
-    const member_permissions = await this.prisma.$transaction(
-      memberPermissionTransaction.flat(),
-    );
-
-    return member_permissions;
-  }
-
-  async findModules(organization_id: string) {
+  async findModules() {
     return await this.prisma.module.findMany({
-      where: { organization_id },
+      where: { enabled: true },
     });
   }
 
@@ -171,7 +100,12 @@ export class RolePermissionService {
       include: {
         role_permissions: {
           include: {
-            module: true,
+            module: {
+              include: {
+                actions: true,
+              },
+            },
+            allowed: true,
           },
         },
       },

@@ -5,7 +5,6 @@ export interface LMStudioResponse {
   model: string;
   choices: Choice[];
   usage: Usage;
-  stats: Stats;
   system_fingerprint: string;
 }
 
@@ -26,6 +25,3 @@ export interface Usage {
   completion_tokens: number;
   total_tokens: number;
 }
-
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface Stats {}

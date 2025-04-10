@@ -5,7 +5,7 @@ export type PriceTableDocument = HydratedDocument<PriceTable>;
 
 @Schema()
 export class PriceTable {
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   name: string;
 
   @Prop({ required: true })
@@ -14,7 +14,7 @@ export class PriceTable {
   @Prop({ required: true })
   organization_id: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   filename: string;
 }
 

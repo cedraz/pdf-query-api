@@ -22,7 +22,6 @@ model Organization {
 
   // Foreign keys
   roles   Role[]
-  modules Module[]
   members Member[]
   invites Invite[]
 

@@ -28,7 +28,7 @@ enum MemberStatus {
 
 model Role {
   id          Int     @id @default(autoincrement())
-  name        String  @unique
+  name        String
   description String?
 
   created_at DateTime  @default(now())
@@ -43,6 +43,7 @@ model Role {
   members          Member[]
   invites          Invite[]
 
+  @@unique([name, organization_id])
   @@map("roles")
 }
 
@@ -66,19 +67,17 @@ model RolePermission {
 }
 
 model Module {
-  id          Int     @id @default(autoincrement())
-  name        String  @unique
-  label       String
-  description String? @default("")
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  display_name String
+  description  String? @default("")
+  enabled      Boolean @default(true)
 
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
   deleted_at DateTime?
 
   // Foreign keys
-  organization_id String
-  organization    Organization @relation(fields: [organization_id], references: [id], onDelete: Cascade)
-
   role_permissions RolePermission[]
   actions          Action[]
 
@@ -86,8 +85,10 @@ model Module {
 }
 
 model Action {
-  id   Int    @id @default(autoincrement())
-  name String @unique
+  id           Int     @id @default(autoincrement())
+  name         String  @unique
+  display_name String
+  enabled      Boolean @default(true)
 
   // Foreign keys
   role_permissions RolePermission[]

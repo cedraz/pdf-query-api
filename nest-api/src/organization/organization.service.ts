@@ -9,7 +9,7 @@ import { Organization } from './entities/organization.entity';
 import { AddMemberToOrganizationDto } from './dto/add-member-to-organization.dto';
 import { CloudinaryService } from 'src/providers/cloudinary/cloudinary.service';
 import { MemberService } from 'src/member/member.service';
-import { moduleData, roleData } from 'prisma/seed-data/role-seed.data';
+import { rolesData } from 'prisma/seed-data/role-seed.data';
 
 @Injectable()
 export class OrganizationService {
@@ -20,54 +20,75 @@ export class OrganizationService {
   ) {}
 
   async create(user_id: string, createOrganizationDto: CreateOrganizationDto) {
-    const organization = await this.prismaService.organization.create({
-      data: {
-        ...createOrganizationDto,
-      },
-      include: {
-        invites: true,
-        members: true,
-      },
+    const [organization, modules] = await Promise.all([
+      this.prismaService.organization.create({
+        data: {
+          ...createOrganizationDto,
+        },
+        include: {
+          invites: true,
+          members: true,
+        },
+      }),
+      this.prismaService.module.findMany({
+        where: {
+          enabled: true,
+        },
+        select: {
+          id: true,
+          name: true,
+          actions: { select: { id: true, name: true } },
+        },
+      }),
+    ]);
+
+    console.log('ORGANIZACAO CRIADA: ', organization);
+
+    const moduleMap = new Map(modules.map((m) => [m.name, m]));
+
+    let adminRoleId: number = 0;
+
+    const roleCreations = rolesData.map((role) => {
+      const isAdmin = role.name === 'ADMIN';
+      const permissions = role.rolePermissions
+        .filter((rp) => moduleMap.has(rp.moduleName))
+        .map((rp) => {
+          const module = moduleMap.get(rp.moduleName)!;
+          return {
+            module_id: module.id,
+            allowed: {
+              connect: rp.permissions.flatMap((p) =>
+                module.actions
+                  .filter((a) => a.name === p.name)
+                  .map((a) => ({ id: a.id })),
+              ),
+            },
+          };
+        });
+
+      const roleCreation = this.prismaService.role.create({
+        data: {
+          organization_id: organization.id,
+          name: role.name,
+          description: role.description,
+          role_permissions: { create: permissions },
+        },
+      });
+
+      if (isAdmin) {
+        roleCreation.then((createdRole) => {
+          adminRoleId = createdRole.id;
+        });
+      }
+
+      return roleCreation;
     });
 
-    const modules = await this.prismaService.$transaction(
-      moduleData.map((module) => {
-        return this.prismaService.module.create({
-          data: {
-            organization_id: organization.id,
-            ...module,
-          },
-        });
-      }),
-    );
-
-    const roles = await this.prismaService.$transaction(
-      roleData.map((role) => {
-        return this.prismaService.role.create({
-          data: {
-            organization_id: organization.id,
-            name: role.name,
-            description: role.description,
-            role_permissions: {
-              createMany: {
-                data: modules.flatMap((module) => {
-                  return role.rolePermissions.map((rolePermission) => ({
-                    allowed: rolePermission.allowed,
-                    module_id: module.id,
-                  }));
-                }),
-              },
-            },
-          },
-        });
-      }),
-    );
-
-    const adminRole = roles.find((role) => role.name === 'ADMIN')!;
+    await Promise.all(roleCreations);
 
     await this.memberService.create({
       organization_id: organization.id,
-      role_id: adminRole.id,
+      role_id: adminRoleId,
       invited_at: new Date().toISOString(),
       user_id,
     });

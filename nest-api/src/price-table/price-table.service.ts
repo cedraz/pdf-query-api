@@ -40,7 +40,7 @@ export class PriceTableService {
     const doctags = await this.doclingService.processPDF(file.buffer);
 
     const createdPriceTable = new this.priceTableModel({
-      filename: file.fieldname,
+      filename: file.originalname,
       doctags: doctags.content,
       name: createPriceTableDto.name,
       organization_id: createPriceTableDto.organization_id,
@@ -57,9 +57,14 @@ export class PriceTableService {
 
     const simulationResult = await this.redisService.get(key);
 
-    if (simulationResult) return simulationResult;
+    if (simulationResult) {
+      const parsedResult = JSON.parse(simulationResult) as {
+        [key: string]: unknown;
+      };
+      return parsedResult;
+    }
 
-    const doctags = await this.priceTableModel.findOne({ filename: name });
+    const doctags = await this.priceTableModel.findOne({ name });
 
     if (!doctags) {
       throw new NotFoundException(ErrorMessagesHelper.PRICE_TABLE_NOT_FOUND);
@@ -70,6 +75,8 @@ export class PriceTableService {
       credit,
       monthly_fee,
     });
+
+    await this.redisService.set(key, result);
 
     return result;
   }

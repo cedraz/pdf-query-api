@@ -1,5 +1,9 @@
 import { PrismaClient } from '@prisma/client';
-import { moduleData, roleData } from './seed-data/role-seed.data';
+import {
+  modulesData,
+  permissionsData,
+  rolesData,
+} from './seed-data/role-seed.data';
 import { organizationData } from './seed-data/seed.data';
 
 export async function roleSeed(prisma: PrismaClient) {
@@ -15,77 +19,81 @@ export async function roleSeed(prisma: PrismaClient) {
     update: {},
   });
 
-  const modules = await Promise.all(
-    moduleData.map((module) => {
+  await prisma.$transaction(
+    permissionsData.map((permission) => {
+      return prisma.action.upsert({
+        where: {
+          name: permission.name,
+        },
+        create: {
+          name: permission.name,
+          display_name: permission.label,
+        },
+        update: {},
+      });
+    }),
+  );
+
+  const modules = await prisma.$transaction(
+    modulesData.map((module) => {
       return prisma.module.upsert({
         where: {
           name: module.name,
         },
         create: {
+          display_name: module.label,
           name: module.name,
-          label: module.label,
-          actions: module.actions,
-          description: module.description,
-          organization_id: organization.id,
+          actions: {
+            connectOrCreate: module.actions.map((action) => ({
+              where: {
+                name: action.name,
+              },
+              create: {
+                name: action.name,
+                display_name: action.label,
+              },
+            })),
+          },
         },
         update: {},
       });
     }),
   );
 
-  const roles = await Promise.all(
-    roleData.map((role) => {
+  const roles = await prisma.$transaction(
+    rolesData.map((role) => {
       return prisma.role.upsert({
         where: {
-          name: role.name,
+          name_organization_id: {
+            name: role.name,
+            organization_id: organization.id,
+          },
         },
         create: {
           name: role.name,
           description: role.description,
           organization_id: organization.id,
+          role_permissions: {
+            create: role.rolePermissions.map((rp) => {
+              return {
+                module_id: modules[rp.moduleIndex].id,
+                allowed: {
+                  connectOrCreate: rp.permissions.map((permission) => ({
+                    where: { name: permission.name },
+                    create: {
+                      name: permission.name,
+                      display_name: permission.label,
+                    },
+                  })),
+                },
+              };
+            }),
+          },
         },
         update: {},
       });
     }),
   );
-
-  const moduleAllowedActions = roleData.map((role) => {
-    return role.rolePermissions.map((rolePermission) => {
-      const moduleId = modules.find(
-        (module) => module.name === rolePermission.moduleName,
-      )?.id;
-
-      if (!moduleId) {
-        throw new Error('Module not found');
-      }
-
-      return {
-        module_id: moduleId,
-        allowed: rolePermission.allowed,
-      };
-    });
-  });
-
-  roles.map((role, index) => {
-    moduleAllowedActions[index].map(async (moduleAllowedAction) => {
-      return prisma.rolePermission.upsert({
-        where: {
-          module_id_role_id: {
-            module_id: moduleAllowedAction.module_id,
-            role_id: role.id,
-          },
-        },
-        create: {
-          role_id: role.id,
-          module_id: moduleAllowedAction.module_id,
-          allowed: moduleAllowedAction.allowed,
-        },
-        update: {
-          allowed: moduleAllowedAction.allowed,
-        },
-      });
-    });
-  });
 
   console.timeEnd('Role Seed');
 
