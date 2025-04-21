@@ -2,19 +2,20 @@ import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { GetPDFInfoDto } from './dto/get-pdf-info.dto';
 import OpenAI from 'openai';
 import { ErrorMessagesHelper } from 'src/helpers/error-messages.helper';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class LmStudioService {
-  private readonly API_URL = 'http://localhost:1234/v1/';
-  private readonly MODEL_NAME = 'deepseek-r1-distill-llama-8b';
-
   private readonly openai: OpenAI;
+  private readonly MODEL_NAME: string;
 
-  constructor() {
+  constructor(private configService: ConfigService) {
     this.openai = new OpenAI({
-      baseURL: this.API_URL,
+      baseURL: this.configService.get('LM_STUDIO_API_URL'),
       apiKey: 'lm-studio',
     });
+
+    this.MODEL_NAME = this.configService.get('MODEL_NAME') as string;
   }
 
   async getSimulationResult(getPDFInfoDto: GetPDFInfoDto) {
