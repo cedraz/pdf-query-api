@@ -3,3 +3,6 @@ redis/data/dump.rdb
 
 # Python Virtual Environment 
 venv/
+
+# Docling
+docling-api/
