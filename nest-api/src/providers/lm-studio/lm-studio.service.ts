@@ -19,24 +19,39 @@ export class LmStudioService {
   }
 
   async getSimulationResult(getPDFInfoDto: GetPDFInfoDto) {
-    const structuredPrompt = `
-    ${getPDFInfoDto.doctags}
+    //     const structuredPrompt = `
+    //     [INST]
+    //     Você receberá o texto extraído de um PDF. Esse texto pode conter uma tabela com dados, mas o formato não estará explícito, pois os separadores e alinhamentos podem variar.
 
-    Analise esta tabela que está completa e me diga qual a melhor proposta para:
+    //     Sua tarefa é:
+    //     1. Analisar o texto e identificar, se existir, uma tabela com linhas e colunas.
+    //     2. Organizar os dados em uma estrutura de tabela no formato JSON, onde cada linha é um objeto com chaves representando os nomes das colunas (tente inferir os rótulos se houver cabeçalho) e os respectivos valores.
+    //     3. Em seguida, filtre apenas as linhas em que o campo "Quantidade" seja maior que 100.
+    //     4. Responda apenas com o JSON resultante.
 
-    crédito de até R$ ${getPDFInfoDto.credit}
-    valor da parcela de até R$ ${getPDFInfoDto.monthly_fee}
+    //     A seguir, o texto extraído:
 
-    Instruções estritas:
-    1. Retorne APENAS o JSON no formato solicitado
-    2. Não inclua nenhum texto adicional
-    3. Não use markdown
-    4. Formato obrigatório:
+    //     [TEXTO_EXTRAÍDO_DO_PDF_AQUI]
+    //     [/INST]
+    // `;
+    //     // const structuredPrompt = `
+    //     // ${getPDFInfoDto.doctags}
 
-    {
-      "asset": "<preencher com o bem>",
-      "monthly_fee": "<preencher com a mensalidade>"
-    }`;
+    //     // Analise esta tabela que está completa e me diga qual a melhor proposta para:
+
+    //     // crédito de até R$ ${getPDFInfoDto.credit}
+    //     // valor da parcela de até R$ ${getPDFInfoDto.monthly_fee}
+
+    //     // Instruções estritas:
+    //     // 1. Retorne APENAS o JSON no formato solicitado
+    //     // 2. Não inclua nenhum texto adicional
+    //     // 3. Não use markdown
+    //     // 4. Formato obrigatório:
+
+    //     // {
+    //     //   "asset": "<preencher com o bem>",
+    //     //   "monthly_fee": "<preencher com a mensalidade>"
+    //     // }`;
 
     try {
       const completion = await this.openai.chat.completions.create({

@@ -65,23 +65,46 @@ npx prisma studio
 
 Nesse template o esquema do banco será bem simples, apenas para demonstrar como esquematizar o banco e como os dados são estruturados.
 
-## Modelo de IA
+## Para rodar a API Python
 
-Para este projeto eu utilizei o LMStudio e rodei localmente o modelo "deepseek-r1-distill-llama-8b" utilizando também a própria função de criar uma API, permitindo assim que eu conseguisse enviar requisições para o modelo através do endpoint gerado pelo próprio LMStudio.
+Primeiramente é necessário instalar as dependências do projeto, para isso va até a pasta "pdf-parser-api" e execute o seguinte comando:
 
-Para fazer isso basta baixar o [LMStudio](https://lmstudio.ai/)
+Abra o ambiente virtual python caso ele não exista:
 
-Procurar o modelo mencionado e baixá-lo
+```bash
+python3 -m venv venv
+```
 
-Após isso basta iniciar o modelo, ir na sessão "Developer" e clicar em "Start Server" no canto superior esquerdo, ou apenas dar "ctrl + .".
+Ative o ambiente virtual:
+```bash
+source venv/bin/activate
+```
 
-Feito isso a URL da API irá aparecer no canto direito do aplicativo.
+Instale as dependências do projeto:
 
-Você pode habilitar o "Verbose Logging" da aplicação e também configurar o modelo para receber mais ou menos tokens (se atentar as especificações da sua máquina)
+```bash
+pip install -r requirements.txt
+```
 
-## Para rodar a API
+Para rodar a API execute no terminal:
 
-Primeiramente é necessário instalar as dependências do projeto, para isso basta executar o seguinte comando:
+```bash
+uvicorn main:app --reload
+```
+
+Caso deseje sair do ambiente virtual execute:
+
+```bash
+deactivate
+```
+
+Demais comandos se encontram no arquivo `package.json` na parte "scripts".
+
+**se precisar utilize o comando sudo**
+
+## Para rodar a API Node
+
+Primeiramente é necessário instalar as dependências do projeto, para isso va até a pasta "nest-api" e execute o seguinte comando:
 
 ```bash
 npm install
@@ -104,6 +127,20 @@ npm run build
 Demais comandos se encontram no arquivo `package.json` na parte "scripts".
 
 **se precisar utilize o comando sudo**
+
+## Modelo de IA
+
+Para este projeto eu utilizei o LMStudio e rodei localmente o modelo "deepseek-r1-distill-llama-8b" utilizando também a própria função de criar uma API, permitindo assim que eu conseguisse enviar requisições para o modelo através do endpoint gerado pelo próprio LMStudio.
+
+Para fazer isso basta baixar o [LMStudio](https://lmstudio.ai/)
+
+Procurar o modelo mencionado e baixá-lo
+
+Após isso basta iniciar o modelo, ir na sessão "Developer" e clicar em "Start Server" no canto superior esquerdo, ou apenas dar "ctrl + .".
+
+Feito isso a URL da API irá aparecer no canto direito do aplicativo.
+
+Você pode habilitar o "Verbose Logging" da aplicação e também configurar o modelo para receber mais ou menos tokens (se atentar as especificações da sua máquina)
 
 ## Cargos e permissionamento
 
