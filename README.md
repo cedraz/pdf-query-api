@@ -69,7 +69,7 @@ Nesse template o esquema do banco será bem simples, apenas para demonstrar como
 
 Primeiramente é necessário instalar as dependências do projeto, para isso va até a pasta "pdf-parser-api" e execute o seguinte comando:
 
-Abra o ambiente virtual python caso ele não exista:
+Abra o ambiente virtual python, caso ele não exista:
 
 ```bash
 python3 -m venv venv
